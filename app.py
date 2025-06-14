@@ -6,6 +6,8 @@ import openai
 # load .env locally if you use one; on Streamlit Cloud you'll set a secret
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
+if not openai.api_key:
+    st.warning("OPENAI_API_KEY not configured.")
 
 st.set_page_config(page_title="Therapy Note Polisher")
 st.title("📝 Therapy Note Polisher")
@@ -36,5 +38,7 @@ if st.button("Polish Note"):
                 polished = resp.choices[0].message.content.strip()
                 st.subheader("Polished SOAP Note")
                 st.code(polished, language="markdown")
-            except Exception as exc:
+            except openai.error.OpenAIError as exc:
                 st.error(f"OpenAI API call failed: {exc}")
+            except Exception as exc:
+                st.error(f"Unexpected error: {exc}")

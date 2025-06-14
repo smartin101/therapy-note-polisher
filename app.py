@@ -26,12 +26,15 @@ if st.button("Polish Note"):
                 "with appropriate medical terminology:\n\n"
                 f"{raw}\n\nFinal Note:\n"
             )
-            resp = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[{"role":"user","content":prompt}],
-                temperature=0.2,
-                max_tokens=600,
-            )
-            polished = resp.choices[0].message.content.strip()
-            st.subheader("Polished SOAP Note")
-            st.code(polished, language="markdown")
+            try:
+                resp = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.2,
+                    max_tokens=600,
+                )
+                polished = resp.choices[0].message.content.strip()
+                st.subheader("Polished SOAP Note")
+                st.code(polished, language="markdown")
+            except Exception as exc:
+                st.error(f"OpenAI API call failed: {exc}")

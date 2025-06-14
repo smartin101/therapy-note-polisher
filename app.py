@@ -1,3 +1,5 @@
+"""Streamlit app that polishes therapist notes via OpenAI."""
+
 import os
 import streamlit as st
 from dotenv import load_dotenv
@@ -11,6 +13,18 @@ if not openai.api_key:
 
 st.set_page_config(page_title="Therapy Note Polisher")
 st.title("📝 Therapy Note Polisher")
+
+
+def polish_note(prompt: str) -> str:
+    """Return a polished SOAP note for the given prompt."""
+    resp = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.2,
+        max_tokens=600,
+    )
+    return resp.choices[0].message.content.strip()
+
 
 raw = st.text_area(
     "Paste your raw therapist note here:",
@@ -29,13 +43,7 @@ if st.button("Polish Note"):
                 f"{raw}\n\nFinal Note:\n"
             )
             try:
-                resp = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=[{"role": "user", "content": prompt}],
-                    temperature=0.2,
-                    max_tokens=600,
-                )
-                polished = resp.choices[0].message.content.strip()
+                polished = polish_note(prompt)
                 st.subheader("Polished SOAP Note")
                 st.code(polished, language="markdown")
             except openai.error.OpenAIError as exc:
